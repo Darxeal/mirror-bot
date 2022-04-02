@@ -4,7 +4,7 @@ from rlbot.agents.base_agent import BaseAgent, SimpleControllerState
 from rlbot.messages.flat.ControllerState import ControllerState
 from rlbot.messages.flat.PlayerInputChange import PlayerInputChange
 from rlbot.socket.socket_manager import SocketRelay
-from rlbot.utils.game_state_util import Vector3, Rotator, Physics, CarState, GameState
+from rlbot.utils.game_state_util import Vector3, Rotator, Physics, CarState, GameState, BallState
 from rlbot.utils.structures.game_data_struct import GameTickPacket
 
 from rlutilities.linear_algebra import vec3, mat3, rotation_to_euler, dot, look_at
@@ -65,9 +65,9 @@ class Mirror(BaseAgent):
     def __init__(self, name, team, index):
         super().__init__(name, team, index)
         self.game = Game()
-        self.kickoff_pause_prev_frame = False
         self.target_index = None
         self.mirror_matrix = None
+        self.impossible_ball = False
 
         self.socket_man = SocketRelay()
         self.socket_man.player_input_change_handlers.append(self.track_target_inputs)
@@ -91,8 +91,18 @@ class Mirror(BaseAgent):
 
     def find_mirror_target(self, packet: GameTickPacket):
         self.target_index = None
+        self.impossible_ball = False
+
+        # if it's a 1v1 against a mirror bot
+        if packet.num_cars == 2 and self.team != packet.game_cars[1 - self.index].team:
+            self.target_index = 1 - self.index
+            self.mirror_matrix = mirror_y
+            self.impossible_ball = True
+            return
 
         team_mirror_index_counter = -1
+        # find a car on own team that is not a mirror bot
+        # and also find our index among team mirror bots
         for i in range(packet.num_cars):
             car = packet.game_cars[i]
             if car.team == self.team:
@@ -118,7 +128,18 @@ class Mirror(BaseAgent):
             )
             mirrored_target.velocity = dot(self.mirror_matrix, mirrored_target.velocity)
             mirrored_target.angular_velocity = dot(self.mirror_matrix, mirrored_target.angular_velocity)
+            if self.mirror_matrix is not mirror_xy:
+                mirrored_target.angular_velocity *= -1
             mirrored_target.boost = mirrored_target.boost
-            self.set_game_state(GameState(cars={self.index: car_to_car_state(mirrored_target)}))
+
+            game_state = GameState(cars={self.index: car_to_car_state(mirrored_target)})
+
+            if self.impossible_ball:
+                game_state.ball = BallState(Physics(
+                    location=Vector3(y=0),
+                    velocity=Vector3(y=0),
+                ))
+
+            self.set_game_state(game_state)
 
         return self.target_controls or SimpleControllerState()
