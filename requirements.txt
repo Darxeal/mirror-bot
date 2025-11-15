@@ -1,0 +1,2 @@
+rlbot>=2.0.0.beta
+numpy

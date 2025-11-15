@@ -1,0 +1,21 @@
+#:schema https://rlbot.org/schemas/agent.json
+[settings]
+name = "MirrorBot"
+loadout_file = "loadout.toml"
+root_dir = ""
+run_command = "..\\.venv\\Scripts\\python bot.py"
+run_command_linux = "../.venv/bin/python bot.py"
+agent_id = "darxeal/mirror-bot"
+logo_file = ""
+
+[details]
+description = """
+It mirrors stuff.
+You can 1v1 it for an impossible game.
+Or put 1-3 mirror bots on your team for an interesting gamemode.
+"""
+fun_fact = "Debuted on the Memebots 2 event hosted by axelalex2 and Sledge."
+source_link = "https://github.com/Darxeal/mirror-bot"
+developer = "Darxeal"
+language = "Python"
+tags = ["memebot"]

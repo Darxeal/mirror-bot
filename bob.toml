@@ -1,0 +1,7 @@
+[[config]]
+project_name = "mirror-bot"
+bot_configs = ["src/bot.toml"]
+
+[config.builder_config]
+builder_type = "pyinstaller"
+entry_file = "bot.spec"
