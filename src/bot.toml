@@ -6,7 +6,6 @@ root_dir = ""
 run_command = "..\\.venv\\Scripts\\python bot.py"
 run_command_linux = "../.venv/bin/python bot.py"
 agent_id = "darxeal/mirror-bot"
-logo_file = ""
 
 [details]
 description = """
